@@ -2,9 +2,18 @@ import sublime
 from sublime_plugin import WindowCommand
 
 
-class PsOutputPanelCommand(WindowCommand):
+class Mixin():
+    def output_panels(self):
+        return [p for p in self.window.panels() if self.include_panel(p)]
+
+    def include_panel(self, name):
+        return name != "output.find_results" and \
+               name.startswith("output")
+
+
+class PsOutputPanelCommand(Mixin, WindowCommand):
     def run(self, idx=0):
-        self.panels = [p for p in self.window.panels() if self.include_panel(p)]
+        self.panels = self.output_panels()
         if len(self.panels) == 0:
             self.window.status_message("No panels found")
             return
@@ -39,6 +48,13 @@ class PsOutputPanelCommand(WindowCommand):
         if self.window.active_panel() != self.panels[idx]:
             self.window.run_command("show_panel", {"panel": self.panels[idx]})
 
-    def include_panel(self, name):
-        return name != "output.find_results" and \
-               name.startswith("output")
+
+class PsOutputPanelNextCommand(Mixin, WindowCommand):
+    def run(self):
+        panels = self.output_panels()
+        try:
+            idx = panels.index(self.window.active_panel())
+            next_idx = (idx+1) % len(panels)
+            self.window.run_command("show_panel", {"panel": panels[next_idx]})
+        except ValueError as e:
+            self.window.run_command("show_panel", {"panel": panels[0]})

@@ -3,4 +3,8 @@
     "caption": "Panel Switch: open output panel",
     "command": "ps_output_panel"
   }
+  ,{
+    "caption": "Panel Switch: next output panel",
+    "command": "ps_output_panel_next"
+  }
 ]
